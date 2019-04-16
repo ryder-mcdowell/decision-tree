@@ -28,7 +28,33 @@ def best_feature_index_for_split(data):
     best_feature_index, best_gain = max(enumerate(information_gain), key=operator.itemgetter(1))
     return best_feature_index
 
+
+def potential_leaf_node(data):
+    counts = collections.Counter([i[-1] for i in data])
+    return counts.most_common(1)[0]
+
+
+def create_tree(data, label):
+    category, count = potential_leaf_node(data)
+    print(category, count)
+
+    if count == len(data):
+        return category
+
+    node = {}
+    feature = best_feature_index_for_split(data)
+    feature_label = label[feature]
+    node[feature_label] = {}
+    classes = set([data_point[feature] for data_point in data])
+    
+    for c in classes:
+        partitioned_data = [data_point for data_point in data if data_point[feature] == c]
+        node[feature_label][c] = create_tree(partitioned_data, label)
+
+    return node
+
+
 if __name__ == '__main__':
     with open("data_rand", "rb") as f:
         L = pickle.load(f)
-        print(best_feature_index_for_split(L))
+        print(create_tree(L, 'y'))
