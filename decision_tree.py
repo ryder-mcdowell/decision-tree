@@ -71,7 +71,7 @@ def as_rule_str(tree, label, ident=0):
     root = list(tree.keys())[0]
     node = tree[root]
     index = label.index(root)
-    
+
     for key in node.keys():
         s += 'if ' + label[index] + ' = ' + str(key)
         if isinstance(node[key], dict):
@@ -86,6 +86,26 @@ def as_rule_str(tree, label, ident=0):
 
     return s
 
+
+def find_edges(tree, label, X, Y):
+    X.sort()
+    Y.sort()
+
+    diagonals = [i for i in set(X).intersection(set(Y))]
+    diagonals.sort()
+
+    L = [classify(tree, label, [d, d]) for d in diagonals]
+
+    low = L.index(False)
+    min_x = X[low]
+    min_y = Y[low]
+
+    high = L[::-1].index(False)
+    max_x = X[len(X) - 1 - high]
+    max_y = Y[len(Y) - 1 - high]
+
+    return (min_x, min_y), (max_x, max_y)
+ 
 
 if __name__ == '__main__':
     with open("data_rand", "rb") as f:
