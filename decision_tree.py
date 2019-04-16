@@ -36,7 +36,6 @@ def potential_leaf_node(data):
 
 def create_tree(data, label):
     category, count = potential_leaf_node(data)
-    print(category, count)
 
     if count == len(data):
         return category
@@ -54,7 +53,45 @@ def create_tree(data, label):
     return node
 
 
+def classify(tree, label, data):
+    root = list(tree.keys())[0]
+    node = tree[root]
+    index = label.index(root)
+    for key in node.keys():
+        if data[index] == key:
+            if isinstance(node[key], dict):
+                return classify(node[key], label, data)
+            else:
+                return node[key]
+
+
+def as_rule_str(tree, label, ident=0):
+    space_ident = ' ' * ident
+    s = space_ident
+    root = list(tree.keys())[0]
+    node = tree[root]
+    index = label.index(root)
+    
+    for key in node.keys():
+        s += 'if ' + label[index] + ' = ' + str(key)
+        if isinstance(node[key], dict):
+            s += ':\n' + space_ident + as_rule_str(node[key], label, ident + 1)
+        else:
+            s += ' then ' + str(node[key]) + ('.\n' if ident == 0 else ', ')
+
+    if s[-2:] == ', ':
+        s = s[:-2]
+
+    s += '\n'
+
+    return s
+
+
 if __name__ == '__main__':
     with open("data_rand", "rb") as f:
         L = pickle.load(f)
-        print(create_tree(L, 'y'))
+        #data = [[0, 0, False], [1, 0, False], [0, 1, True], [1, 1, True]]
+        label = ['x', 'y', 'out']
+        tree = create_tree(L, label)
+        print(as_rule_str(tree, label))
+        print(classify(tree, label, [1, 1]))
